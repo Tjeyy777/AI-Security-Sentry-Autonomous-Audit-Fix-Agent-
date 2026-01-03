@@ -1,11 +1,10 @@
-Markdown
 
 # 🛡️ AI Security Sentry
 ### Autonomous Audit & Fix Agent
 
 ![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![License](https://img.shields.io/badge/license-MIT-green)
+
 
 **AI Security Sentry** is an intelligent, agentic security engineer that lives in your CLI and CI/CD pipeline. Unlike traditional scanners that simply dump a list of warnings, this agent **reasons** about vulnerabilities, filters false positives, and **automatically writes fixes** for your code.
 
@@ -45,89 +44,152 @@ This is not just a script; it is a **Multi-Agent System**. The workflow is orche
 -   **Professional Reporting:** Generates an investor-ready `SECURITY_AUDIT.md` with every run.
 
 ---
+# 🛡️ AI Security Sentry: User Guide
 
-## 🛠️ Installation & Setup
-
-### Prerequisites
--   Python 3.10 or higher
--   Git
--   An OpenAI API Key
-
-### 1. Clone the Repository
-```bash
-git clone [https://github.com/Tjeyy777/AI-Security-Sentry-Autonomous-Audit-Fix-Agent-.git](https://github.com/Tjeyy777/AI-Security-Sentry-Autonomous-Audit-Fix-Agent-.git)
-cd AI-Security-Sentry
+Welcome to the **AI Security Sentry**! This tool is an autonomous security engineer designed to find, analyze, and help fix vulnerabilities in Python projects. It uses **LangGraph** for decision-making and **GPT-4o** as the "brain" to understand code context.
 
 
-2. Create a Virtual Environment
-Windows:
-Bash
-python -m venv venv
-source venv/Scripts/activate
 
-Mac/Linux:
-Bash
-python3 -m venv venv
+---
+
+## 🛠️ 1. Local Installation
+Before you can run the agent, you need to prepare your environment.
+
+1. **Clone the Repository:**
+   ```bash
+   git clone [https://github.com/Tjeyy777/AI-Security-Sentry-Autonomous-Audit-Fix-Agent-.git](https://github.com/Tjeyy777/AI-Security-Sentry-Autonomous-Audit-Fix-Agent-.git)
+   cd AI-Security-Sentry
+
+2.Create a Virtual Environment:
+# Windows
+```python -m venv venv
+venv\Scripts\activate
+```
+# Mac/Linux
+```python3 -m venv venv
 source venv/bin/activate
+```
+# 3.Install Dependencies:
 
-3. Install Dependencies
-Bash
-pip install -r requirements.txt
-This installs LangChain, LangGraph, Semgrep, and other core libraries.
+``` pip install -r requirements.txt ```
 
-4. Configure Environment
-Create a .env file in the root directory and add your OpenAI API key:
-Code snippet
-OPENAI_API_KEY=sk-proj-12345...
+# 4.Set up OpenAI API Key: Create a file named .env in the root folder and add:
+```OPENAI_API_KEY=your_actual_key_here```
 
-💻 Usage
-Local Mode (CLI)
-Run the agent manually to scan your current project folder.
 
-Bash
-python main.py
-What happens next?
+# 🚀 2. How to Use (Local Modes)
+Run the agent using the command: python main.py. You will be presented with a menu:
 
-Plan: The agent lists files to scan.
-Scan: Semgrep and TruffleHog run in the background.
-Audit: The AI analyzes findings and creates SECURITY_AUDIT.md.
-Fix (Optional): The agent will pause and ask:
+### 📂 Option 1: Project Scan (Professional Mode)
 
-🧪 AI has generated security patches. Apply changes? (y/n)
-Type y: The agent rewrites the vulnerable files with secure code.
-Type n: The agent exits, leaving the report for you to review.
+This mode is built for real-world development. It allows the agent to leave the sandbox and audit any external project folder on your machine.
 
-CI/CD Mode (GitHub Actions)
-This agent is pre-configured to run on every git push.
-Navigate to the Actions tab in your repository.
-Ensure you have added OPENAI_API_KEY to your Repository Secrets.
+* **What it does:** Recursively crawls an entire external folder, identifying all Python files for analysis.
+* **How to use:** When prompted, paste the **full directory path** of the project you want to audit.
+    * *Example:* `C:/Users/YourName/Desktop/MyWebProject`
+* **Outcome:** 1.  The agent runs a full security sweep using **Semgrep** and **TruffleHog**.
+    2.  The AI Auditor analyzes the findings for context.
+    3.  A comprehensive report named `SECURITY_AUDIT.md` is generated and saved **directly inside** the target project folder for easy access.
 
-On every push, the agent will:
-Scan the code.
-Generate a report.
-Upload SECURITY_AUDIT.md as a build artifact.
+### 🧪 Option 2: Sandbox Test (Demo Mode)
 
-📊 Example Output
-The agent generates a professional Security Audit Report (SECURITY_AUDIT.md):
+Perfect for first-time users or for demonstrating the agent's capabilities without risking changes to a live project.
 
-🔴 SQL Injection Detected
-Location: vulnerable.py:25
+* **What it does:** Instantly targets the built-in `vulnerable.py` file included in this repository. 
+* **How to use:** Select **Option 2** from the main menu. No path input is required.
+* **Outcome:** * The agent performs a "deep dive" scan on the sample file.
+    * You can watch the **Auditor Node** explain exactly why the sample code is insecure.
+    * Ideal for verifying that your API keys and environment are set up correctly.
 
-❌ Original Code:
+---
 
-Python
-cursor.execute("SELECT * FROM users WHERE name = '" + user_input + "'")
-✅ Recommended Fix:
+## 🤖 3. The Multi-Agent Architecture
 
-Python
-cursor.execute("SELECT * FROM users WHERE name = ?", (user_input,))
-Reason: Parameterized queries prevent attackers from injecting malicious SQL commands.
+The **AI Security Sentry** is not a simple script; it is a sophisticated **Directed Acyclic Graph (DAG)** built on **LangGraph**. When you initiate a scan, the agent orchestrates the workflow through four specialized nodes:
 
-🤝 Contributing
-Contributions are welcome! Please open an issue or submit a Pull Request.
+### 🗺️ Node 1: The Planner
+* **Role:** The Strategist.
+* **Logic:** It maps out the target directory, filters out irrelevant files (like those in `.gitignore` or `venv`), and builds a prioritized queue of Python files to be analyzed.
 
-Fork the Project.
-Create your Feature Branch (git checkout -b feature/AmazingFeature).
-Commit your Changes (git commit -m 'Add some AmazingFeature').
-Push to the Branch (git push origin feature/AmazingFeature).
-Open a Pull Request.
+### 🔍 Node 2: The Scanner
+* **Role:** The Investigator.
+* **Tools:** Runs a dual-engine scan:
+    * **Semgrep:** Performs Static Analysis (SAST) to find logic flaws like SQL injection or insecure imports.
+    * **TruffleHog:** Scours the code for hardcoded secrets, API keys, and private tokens.
+
+### 🧠 Node 3: The Auditor (AI Engine)
+* **Role:** The Expert Analyst (Powered by GPT-4o).
+* **Intelligence:** It reviews raw data from the Scanner. The Auditor is trained to:
+    * **Eliminate False Positives:** Contextually understands if a "bug" is actually intended.
+    * **Risk Scoring:** Assigns severity levels (Critical, High, Medium, Low).
+    * **Plain English Explanations:** Translates complex security vulnerabilities into readable summaries.
+
+### 🛠️ Node 4: The Fixer
+* **Role:** The Security Engineer.
+* **Action:** Automatically generates secure code patches. 
+    * **Safety Gate:** In Local Mode, the Fixer will **always ask for user permission** before modifying any source code.
+    * **CI/CD Mode:** Generates a "Proposed Fixes" report without altering the build files.
+
+---
+
+☁️ 4. Automating with GitHub Actions
+To make the agent scan your code automatically every time you git push, follow these steps in your repository:
+
+Step A: Add your Secret
+Go to Settings > Secrets and variables > Actions and add:
+Name: OPENAI_API_KEY
+Value: (Your OpenAI Key)
+
+Step B: Create the Workflow
+Create a file at .github/workflows/security.yml and paste:
+name: AI Security Sentry
+
+on: [push]
+```YAML
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Run Agent
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GITHUB_ACTIONS: "true"
+        run: |
+          pip install -r requirements.txt
+          python main.py .
+      - name: Save Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-report
+          path: SECURITY_AUDIT.md  
+```
+## 📊 5. Understanding the Report
+
+Every scan generates a comprehensive `SECURITY_AUDIT.md` file. The agent uses a standardized risk-rating system to help you prioritize your security backlog.
+
+### 🛑 Severity Levels
+
+| Severity | Risk Level | Description | Example |
+| :--- | :--- | :--- | :--- |
+| 🔴 **Critical** | **Immediate** | Direct exploits that could lead to data breaches. | SQL Injection, Remote Code Execution |
+| 🟠 **High** | **Serious** | Significant flaws that compromise security posture. | Broken Authentication, Leaked API Keys |
+| 🟡 **Medium** | **Best Practice** | Deviations from security standards and hardening. | Hardcoded Configs, Insecure Imports |
+
+### 📝 What's Inside Each Finding?
+
+The AI Auditor doesn't just list errors; it provides a full engineering context for every discovery:
+
+* **📍 Exact Location:** Clearly identifies the file path and specific line number where the issue resides.
+* **⚠️ The "Danger" Analysis:** A detailed explanation from the AI on *why* this specific line is a threat and how an attacker might exploit it.
+* **✅ Remediation Snippet:** A "copy-paste ready" code block showing the secure version of your code.
+* **🔗 References:** Links to CWE (Common Weakness Enumeration) or OWASP standards when applicable.
+
+---
+
+💡 Pro-Tip for Users
+If you are running this on a large project, make sure to add folders like tests/ or dist/ to your .gitignore so the agent focuses only on your main source code!
+
