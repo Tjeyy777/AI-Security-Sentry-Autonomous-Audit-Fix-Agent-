@@ -1,0 +1,24 @@
+rules:
+  - id: manual-os-system-check
+    pattern: os.system(...)
+    message: "Command Injection found!"
+    severity: ERROR
+    languages: [python]
+
+  - id: manual-sqlite-injection-check
+    pattern: $DB.execute(...)
+    message: "SQL Injection detected!"
+    severity: ERROR
+    languages: [python]
+
+  - id: insecure-pickle-load
+    pattern: pickle.loads(...)
+    message: "Critical: Insecure Pickle Deserialization!"
+    severity: ERROR
+    languages: [python]
+
+  - id: path-traversal-open
+    pattern: open(f"...", ...)
+    message: "Potential Path Traversal in open()!"
+    severity: WARNING
+    languages: [python]

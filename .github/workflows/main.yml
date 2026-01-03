@@ -1,0 +1,21 @@
+name: Security Agent CI
+on: [push]
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Install Dependencies
+        run: |
+          pip install -r requirements.txt
+          # Install TruffleHog (Linux version)
+          curl -sSfL [https://raw.githubusercontent.com/trufflehog/trufflehog/main/scripts/install.sh](https://raw.githubusercontent.com/trufflehog/trufflehog/main/scripts/install.sh) | sh -s -- -b /usr/local/bin
+      - name: Run Agent
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: python main.py
